@@ -1,20 +1,22 @@
 import mongoose from "mongoose";
 
 const schema = new mongoose.Schema({
-    name: {
+    title: {
         type: String,
         required: true,
-        unique: true,
     },
-    email: {
+    description: {
         type: String,
         required: true,
-        unique: true,
     },
-    password: {
-        type: String,
+    isCompleted: {
+        type: Boolean,
+        default: false,
+    },
+    user: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: 'User',
         required: true,
-        selected: false, //to not return password in response
     },
     createdAt: {
         type: Date,
@@ -22,6 +24,4 @@ const schema = new mongoose.Schema({
     },
     });
 
-const User = mongoose.model('User', schema);
-
-export default User;
+const Task = mongoose.model('Task', schema);

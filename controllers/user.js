@@ -1,58 +1,77 @@
 import User from "../models/user.js";
+import bcrypt from "bcrypt";
+import sendCookie from "../utils/features.js";
 
+const getAllUsers = async (req, res) => {}
 
-const getAllUsers = async (req, res) => {
+const loginUser = async (req, res, next) => {
 
-    const users = await User.find({});
+    const { email, password} = req.body;
 
-    //const key1 = req.query.key1; //http://localhost:4000/users/all?key1=lande&&key2=sujay
-    //console.log(key1); //params are used to get data from url
+    let user = await User.findOne({ email}).select("+password"); //to return password in response
 
-    res.json({
-        success: true,
-        users
-    });
+    if(!user){
+        return res.status(404).json({
+            success: false,
+            message: "Invalid email or password",
+        });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+
+    if(!isMatch){
+        return res.status(404).json({
+            success: false,
+            message: "Invalid email or password",
+        });
+    }
+
+    sendCookie(user, res, `Welcome back, ${user.name}`, 200);
 }
 
 const registerUser = async (req, res) => {
 
-    // const users = await User.create({ //hardcoded user
-    //     name: 'John',
-    //     email: 'john@gamil.com',
-    //     password: '123456',
-    // });
+    const { name, email, password} = req.body;
 
-    const { name, email, password } = req.body;
+    let user = await User.findOne({ email});
 
-    const user = await User.create({
-        name,
-        email,
-        password,
-    });
+    if(user){
+        return res.status(404).json({
+            success: false,
+            message: "User already exists",
+        });
+    }
 
-    res.status(201).cookie("tempi","lol").json({
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        user = await User.create({
+            name,
+            email,
+            password: hashedPassword,
+        });
+
+        sendCookie(user, res, "User registered successfully", 201);
+
+        };
+
+const getMyProfile = (req, res) => {
+
+    res.status(200).json({
         success: true,
-        message: "User created successfully"
+        user: req.user,
     });
 }
 
-const jokeFunction = async (req, res) => {
-    res.json({
+const logoutUser = (req, res) => {
+
+    res.cookie("token", null, { //token value is set to null
+        expires: new Date(Date.now()),
+        httpOnly: true,
+    }).json({
         success: true,
-        message: "just joking"
+        message: "Logged out successfully",
     });
+
 }
 
-const getUserDetails = async (req, res) => {
-    
-    const { id } = req.params;
-
-    const user = await User.findById(id);
-
-    res.json({
-        success: true,
-        user
-    });
-}
-
-export { getAllUsers, registerUser, jokeFunction, getUserDetails};
+export { logoutUser, getAllUsers, loginUser, registerUser, getMyProfile};

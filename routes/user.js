@@ -1,6 +1,6 @@
 import express from "express";
-import User from "../models/user.js";
-import { getUserDetails, jokeFunction, registerUser, getAllUsers } from "../controllers/user.js";
+import { logoutUser, getMyProfile, registerUser, loginUser, getAllUsers } from "../controllers/user.js";
+import isAuthenticated from "../middlewares/auth.js";
 
 const router = express.Router();
 
@@ -8,11 +8,11 @@ router.get('/all', getAllUsers);
 
 router.post('/new', registerUser);
 
-router.get('/userid/joke', jokeFunction);
+router.post('/login', loginUser);
 
-//dynamic url params 
-//try to write dynamic url params at the end of all the routes
-router.get('/userid/:id', getUserDetails);
+router.get('/logout', logoutUser); //get request because we are not sending any data
+
+router.get('/me', isAuthenticated, getMyProfile);
 
 
 export default router;
