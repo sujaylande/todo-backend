@@ -59,6 +59,8 @@ const logoutUser = (req, res) => {
     res.cookie("token", null, { //token value is set to null
         expires: new Date(Date.now()),
         httpOnly: true,
+        sameSite: process.env.NODE_ENV === "development" ? "lax" : "none", //lax for development, none for production
+        secure: process.env.NODE_ENV === "development" ? false : true, //false for development, true for production
     }).json({
         success: true,
         message: "Logged out successfully",
