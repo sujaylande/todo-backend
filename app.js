@@ -25,7 +25,7 @@ app.use("/api/v1/users", useRouter); //middleware to use the router
 app.use("/api/v1/task", taskRouter); //middleware to use the router
 
 app.get('/', (req, res) => {
-    res.send('Hello World!');
+    res.send('Welcome Todo!');
     });
 
 //middleware to handle errors
