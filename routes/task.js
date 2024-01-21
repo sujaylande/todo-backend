@@ -10,6 +10,8 @@ router.get("/my", isAuthenticated, getMyTask);
 
 //we use .route to chain the methods to the same route
 //we use .put to update the task 
-router.route("/:id").put(isAuthenticated, updateTask).delete(isAuthenticated, deleteTask);
+router.route("/:id")
+.put(isAuthenticated, updateTask)
+.delete(isAuthenticated, deleteTask);
 
 export default router;

@@ -1,46 +1,36 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import sendCookie from "../utils/features.js";
-
-const getAllUsers = async (req, res) => {}
+import ErrorHandler from "../middlewares/error.js";
 
 const loginUser = async (req, res, next) => {
 
-    const { email, password} = req.body;
+    try {
+        const { email, password } = req.body;
 
-    let user = await User.findOne({ email}).select("+password"); //to return password in response
+        let user = await User.findOne({ email }).select("+password"); //to return password in response
 
-    if(!user){
-        return res.status(404).json({
-            success: false,
-            message: "Invalid email or password",
-        });
+        if (!user) return next(new ErrorHandler("Invalid email or password", 400));
+
+        const isMatch = await bcrypt.compare(password, user.password);
+
+        if (!isMatch) return next(new ErrorHandler("Invalid email or password", 400));
+
+        sendCookie(user, res, `Welcome back, ${user.name}`, 200);
+
+    } catch (error) {
+        next(error);
     }
-
-    const isMatch = await bcrypt.compare(password, user.password);
-
-    if(!isMatch){
-        return res.status(404).json({
-            success: false,
-            message: "Invalid email or password",
-        });
-    }
-
-    sendCookie(user, res, `Welcome back, ${user.name}`, 200);
 }
 
 const registerUser = async (req, res) => {
 
-    const { name, email, password} = req.body;
+    try {
+        const { name, email, password } = req.body;
 
-    let user = await User.findOne({ email});
+        let user = await User.findOne({ email });
 
-    if(user){
-        return res.status(404).json({
-            success: false,
-            message: "User already exists",
-        });
-    }
+        if (user) return next(new ErrorHandler("User already exists", 400));
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -51,8 +41,10 @@ const registerUser = async (req, res) => {
         });
 
         sendCookie(user, res, "User registered successfully", 201);
-
-        };
+    } catch (error) {
+        next(error);
+    }
+};
 
 const getMyProfile = (req, res) => {
 
@@ -74,4 +66,4 @@ const logoutUser = (req, res) => {
 
 }
 
-export { logoutUser, getAllUsers, loginUser, registerUser, getMyProfile};
+export { logoutUser, loginUser, registerUser, getMyProfile };

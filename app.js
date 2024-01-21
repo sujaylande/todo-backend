@@ -3,6 +3,7 @@ import useRouter from './routes/user.js';
 import taskRouter from './routes/task.js';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
+import {errorMiddleware} from './middlewares/error.js';
 
 const app = express();
 
@@ -19,5 +20,7 @@ app.get('/', (req, res) => {
     res.send('Hello World!');
     });
 
+//middleware to handle errors
+app.use(errorMiddleware);
 
 export default app;
